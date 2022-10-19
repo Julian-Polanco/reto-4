@@ -27,15 +27,21 @@ class ContentPage extends GetView<LocationController> {
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: ElevatedButton(
                       onPressed: () async {
-                       final locations = await gpsController.currentLocation;
-                       final accuracy = await gpsController.locationAccuracy;
-                        TrackedLocation location = TrackedLocation(
-                            timestamp: DateTime.now(),
-                            latitude: gpsController.location!.latitude,
-                            longitude: gpsController.location!.longitude,
-                            precision:
-                                gpsController.locationAccuracy.toString());
-                        return await controller.saveLocation(location: location);
+                        late final TrackedLocation location;
+                        gpsController.currentLocation.then(
+                          (locationData) => {
+                            gpsController.locationAccuracy.then(
+                              (value) => {
+                                location = TrackedLocation(
+                                    latitude: locationData.latitude,
+                                    longitude: locationData.longitude,
+                                    precision: value.name,
+                                    timestamp: DateTime.now()),
+                                controller.saveLocation(location: location),
+                              },
+                            )
+                          },
+                        );
                       },
                       child: const Text("Registrar Ubicacion"),
                     ),
